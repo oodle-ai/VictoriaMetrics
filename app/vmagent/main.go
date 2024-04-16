@@ -152,7 +152,13 @@ func main() {
 	logger.Infof("started vmagent in %.3f seconds", time.Since(startTime).Seconds())
 
 	pushmetrics.Init()
-	sig := procutil.WaitForSigterm()
+	for {
+		// Do not stop agent on signals. It creates a lot of
+		// "Completed" pods.
+		sig := procutil.WaitForSigterm()
+		logger.Warnf("received signal %s", sig)
+	}
+
 	logger.Infof("received signal %s", sig)
 	remotewrite.StopIngestionRateLimiter()
 	pushmetrics.Stop()

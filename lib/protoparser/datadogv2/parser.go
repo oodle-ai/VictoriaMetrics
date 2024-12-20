@@ -115,13 +115,11 @@ type Series struct {
 	Resources      []Resource `json:"resources"`
 	SourceTypeName string     `json:"source_type_name"`
 
-	Tags []string
+	Tags []string `json:"tags"`
 
-	// Do not decode Type, since it isn't used by VictoriaMetrics
-	// Type int `json:"type"`
+	Type int `json:"type"`
 
-	// Do not decode Unit, since it isn't used by VictoriaMetrics
-	// Unit string
+	Unit string
 }
 
 func (s *Series) reset() {
@@ -150,11 +148,25 @@ func (s *Series) reset() {
 
 func (s *Series) unmarshalProtobuf(src []byte) (err error) {
 	// message MetricSeries {
-	//   string metric = 2;
-	//   repeated Point points = 4;
-	//   repeated Resource resources = 1;
-	//   string source_type_name = 7;
-	//   repeated string tags = 3;
+	// 	 // Resources this series applies to; include at least
+	// 	 // { type="host", name=<hostname> }
+	// 	 repeated Resource resources = 1;
+	// 	 // metric name
+	// 	 string metric = 2;
+	// 	 // tags for this metric
+	// 	 repeated string tags = 3;
+	// 	 // data points for this metric
+	// 	 repeated MetricPoint points = 4;
+	// 	 // type of metric
+	// 	 MetricType type = 5;
+	// 	 // metric unit name
+	// 	 string unit = 6;
+	// 	 // source of this metric (check name, etc.)
+	// 	 string source_type_name = 7;
+	// 	 // interval, in seconds, between samples of this metric
+	// 	 int64 interval = 8;
+	// 	 // Metrics origin metadata
+	// 	 Metadata metadata = 9;
 	// }
 	//
 	// See https://github.com/DataDog/agent-payload/blob/d7c5dcc63970d0e19678a342e7718448dd777062/proto/metrics/agent_payload.proto
@@ -188,6 +200,12 @@ func (s *Series) unmarshalProtobuf(src []byte) (err error) {
 			if err := pt.unmarshalProtobuf(data); err != nil {
 				return fmt.Errorf("cannot unmarshal point: %s", err)
 			}
+		case 5:
+			typ, ok := fc.Int32()
+			if !ok {
+				return fmt.Errorf("cannot unmarshal type")
+			}
+			s.Type = int(typ)
 		case 1:
 			data, ok := fc.MessageData()
 			if !ok {

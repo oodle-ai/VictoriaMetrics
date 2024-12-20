@@ -8,7 +8,7 @@ import (
 func TestDogsketchQuantile(t *testing.T) {
 	f := func(d *Dogsketch, q float64, vExpected float64) {
 		t.Helper()
-		v := d.quantile(q)
+		v := d.Quantile(q)
 		if math.Abs(v-vExpected) > 0.01 {
 			t.Fatalf("unexpected value; got %v; want %v", v, vExpected)
 		}

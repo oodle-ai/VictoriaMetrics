@@ -174,7 +174,7 @@ func (s *Sketch) ToSummary() []*Metric {
 			timestamp := d.Ts * 1000
 			points[j] = Point{
 				Timestamp: timestamp,
-				Value:     d.quantile(q),
+				Value:     d.Quantile(q),
 			}
 			sumPoints[j] = Point{
 				Timestamp: timestamp,
@@ -286,7 +286,7 @@ func (d *Dogsketch) unmarshalProtobuf(src []byte) (err error) {
 }
 
 // This function has been copied from https://github.com/DataDog/opentelemetry-mapping-go/blob/48d52eeea60d28da2e14c154a24557c4d290c6e2/pkg/quantile/sparse.go#L92
-func (d *Dogsketch) quantile(q float64) float64 {
+func (d *Dogsketch) Quantile(q float64) float64 {
 	switch {
 	case d.Cnt == 0:
 		return 0

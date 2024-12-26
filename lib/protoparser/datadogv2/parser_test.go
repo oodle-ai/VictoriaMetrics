@@ -76,4 +76,51 @@ func TestRequestUnmarshalJSONSuccess(t *testing.T) {
 			},
 		}},
 	})
+	f(`
+{
+  "series": [
+    {
+      "metric": "demo.rate",
+      "type": 2,
+	  "interval": 10,	
+      "points": [
+        {
+          "timestamp": 1636629071,
+          "value": 0.7
+        }
+      ],
+      "resources": [
+        {
+          "name": "dummyhost",
+          "type": "host"
+        }
+      ],
+      "source_type_name": "kubernetes",
+      "tags": ["environment:test"]
+    }
+  ]
+}
+`, &Request{
+		Series: []Series{{
+			Metric:   "demo.rate",
+			Type:     2,
+			Interval: 10,
+			Points: []Point{
+				{
+					Timestamp: 1636629071,
+					Value:     0.7,
+				},
+			},
+			Resources: []Resource{
+				{
+					Name: "dummyhost",
+					Type: "host",
+				},
+			},
+			SourceTypeName: "kubernetes",
+			Tags: []string{
+				"environment:test",
+			},
+		}},
+	})
 }

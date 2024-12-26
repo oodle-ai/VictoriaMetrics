@@ -100,8 +100,7 @@ func (req *Request) unmarshalProtobuf(src []byte) (err error) {
 //
 // See https://docs.datadoghq.com/api/latest/metrics/#submit-metrics
 type Series struct {
-	// Do not decode Interval, since it isn't used by VictoriaMetrics
-	// Interval int64 `json:"interval"`
+	Interval int64 `json:"interval"`
 
 	// Do not decode Metadata, since it isn't used by VictoriaMetrics
 	// Metadata Metadata `json:"metadata"`
@@ -124,6 +123,8 @@ type Series struct {
 
 func (s *Series) reset() {
 	s.Metric = ""
+	s.Interval = 0
+	s.Type = 0
 
 	points := s.Points
 	for i := range points {
@@ -206,6 +207,12 @@ func (s *Series) unmarshalProtobuf(src []byte) (err error) {
 				return fmt.Errorf("cannot unmarshal type")
 			}
 			s.Type = int(typ)
+		case 8:
+			interval, ok := fc.Int64()
+			if !ok {
+				return fmt.Errorf("cannot unmarshal interval")
+			}
+			s.Interval = interval
 		case 1:
 			data, ok := fc.MessageData()
 			if !ok {

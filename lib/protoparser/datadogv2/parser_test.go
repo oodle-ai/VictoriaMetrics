@@ -82,7 +82,7 @@ func TestRequestUnmarshalJSONSuccess(t *testing.T) {
     {
       "metric": "demo.rate",
       "type": 2,
-	  "interval": 10,	
+      "interval": 10,	
       "points": [
         {
           "timestamp": 1636629071,

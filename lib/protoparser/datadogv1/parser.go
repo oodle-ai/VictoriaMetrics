@@ -56,20 +56,20 @@ type Series struct {
 	// https://github.com/DataDog/datadog-agent/blob/0ada7a97fed6727838a6f4d9c87123d2aafde735/pkg/metrics/series.go#L84-L105
 	Device string `json:"device"`
 
-	// Do not decode Interval, since it isn't used by VictoriaMetrics
-	// Interval int64 `json:"interval"`
+	Interval int64 `json:"interval"`
 
 	Points []Point  `json:"points"`
 	Tags   []string `json:"tags"`
 
-	// Do not decode Type, since it isn't used by VictoriaMetrics
-	// Type string `json:"type"`
+	Type string `json:"type"`
 }
 
 func (s *Series) reset() {
 	s.Metric = ""
 	s.Host = ""
 	s.Device = ""
+	s.Interval = 0
+	s.Type = ""
 
 	points := s.Points
 	for i := range points {

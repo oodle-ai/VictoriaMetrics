@@ -6,7 +6,36 @@ import (
 
 	"github.com/klauspost/compress/gzip"
 	"github.com/klauspost/compress/zlib"
+	"github.com/klauspost/compress/zstd"
 )
+
+var zstdReaderPool sync.Pool
+
+// GetZstdReader returns new gzip reader from the pool.
+//
+// Return back the gzip reader when it no longer needed with PutZstdReader.
+func GetZstdReader(r io.Reader) (*zstd.Decoder, error) {
+	v := zstdReaderPool.Get()
+	if v == nil {
+		return zstd.NewReader(r)
+	}
+	zr := v.(*zstd.Decoder)
+	if err := zr.Reset(r); err != nil {
+		return nil, err
+	}
+	return zr, nil
+}
+
+// PutZstdReader returns back gzip reader obtained via GetZstdReader.
+func PutZstdReader(zr *zstd.Decoder) {
+	// Zstd decoder cannot be re-used after close.
+	if err := zr.Reset(nil); err != nil {
+		// Do not add it back to the pool.
+		return
+	}
+
+	zstdReaderPool.Put(zr)
+}
 
 // GetGzipReader returns new gzip reader from the pool.
 //

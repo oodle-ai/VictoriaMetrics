@@ -24,6 +24,13 @@ func Parse(r io.Reader, contentEncoding, contentType string, callback func(serie
 	r = wcr
 
 	switch contentEncoding {
+	case "zstd":
+		zsr, err := common.GetZstdReader(r)
+		if err != nil {
+			return fmt.Errorf("cannot read zstd compressed DataDog data: %w", err)
+		}
+		defer common.PutZstdReader(zsr)
+		r = zsr
 	case "gzip":
 		zr, err := common.GetGzipReader(r)
 		if err != nil {

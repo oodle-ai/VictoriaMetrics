@@ -118,13 +118,14 @@ type Series struct {
 
 	Type int `json:"type"`
 
-	Unit string
+	Unit string `json:"unit"`
 }
 
 func (s *Series) reset() {
 	s.Metric = ""
 	s.Interval = 0
 	s.Type = 0
+	s.Unit = ""
 
 	points := s.Points
 	for i := range points {
@@ -207,6 +208,12 @@ func (s *Series) unmarshalProtobuf(src []byte) (err error) {
 				return fmt.Errorf("cannot unmarshal type")
 			}
 			s.Type = int(typ)
+		case 6:
+			unit, ok := fc.String()
+			if !ok {
+				return fmt.Errorf("cannot unmarshal unit")
+			}
+			s.Unit = unit
 		case 8:
 			interval, ok := fc.Int64()
 			if !ok {

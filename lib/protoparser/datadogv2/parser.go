@@ -20,7 +20,14 @@ func (req *Request) reset() {
 	// re-use in json.Unmarshal() when the corresponding field is missing
 	// in the unmarshaled JSON.
 	// See https://github.com/VictoriaMetrics/VictoriaMetrics/issues/3432
-	series := req.Series
+	//
+	// Reset up to the capacity, not only up to the length. The decoders
+	// write elements past the length: unmarshalProtobuf fills them and
+	// then returns an error without a change to the length, and
+	// json.Unmarshal decodes into the elements inside the capacity without
+	// a reset. A field that the next body leaves out then keeps the value
+	// of an earlier request. Series.reset does the same for its slices.
+	series := req.Series[:cap(req.Series)]
 	for i := range series {
 		series[i].reset()
 	}
@@ -127,13 +134,13 @@ func (s *Series) reset() {
 	s.Type = 0
 	s.Unit = ""
 
-	points := s.Points
+	points := s.Points[:cap(s.Points)]
 	for i := range points {
 		points[i].reset()
 	}
 	s.Points = points[:0]
 
-	resources := s.Resources
+	resources := s.Resources[:cap(s.Resources)]
 	for i := range resources {
 		resources[i].reset()
 	}
@@ -141,7 +148,7 @@ func (s *Series) reset() {
 
 	s.SourceTypeName = ""
 
-	tags := s.Tags
+	tags := s.Tags[:cap(s.Tags)]
 	for i := range tags {
 		tags[i] = ""
 	}
